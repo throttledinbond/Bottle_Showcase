@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIB — First Generation Release</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:     #F2EDE3;
+    --charcoal:  #1A1917;
+    --charcoal2: #242220;
+    --charcoal3: #2E2C28;
+    --charcoal4: #3E3B35;
+    --gold:      #C8952A;
+    --gold-lt:   #E8B84B;
+    --gold-dk:   #9A6E18;
+    --cream2:    #E8E0D0;
+    --cream3:    #D6CCBA;
+    --ink:       #2A2722;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-mono:    'IBM Plex Mono', monospace;
+    --font-serif:   'Cormorant Garamond', serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: var(--charcoal);
+    background-image: url('https://raw.githubusercontent.com/throttledinbond/Bottle_Showcase/main/Mustang_GT.jpeg');
+    background-size: cover;
+    background-position: center 40%;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    color: var(--cream);
+    font-family: var(--font-mono);
+    overflow-x: hidden;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* dark overlay over entire page */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(26,25,23,.82);
+    z-index: 0;
+    pointer-events: none;
+    transition: background .6s ease;
+  }
+
+  body.detail-open::before {
+    background: rgba(26,25,23,.92);
+  }
+
+  /* ── MAIN STAGE ── */
+  #stage {
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── TRIO VIEW ── */
+  #trio-view {
+    width: 100%;
+    padding: 48px 40px 56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: opacity .4s ease, transform .4s ease;
+    position: relative;
+  }
+
+  /* keep all trio content above the overlay */
+  #trio-view > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .trio-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  .trio-headline {
+    font-family: var(--font-display);
+    font-size: clamp(36px, 6vw, 64px);
+    color: var(--cream);
+    letter-spacing: .04em;
+    line-height: 1;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .trio-subhead {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    color: #C4BAA6;
+    font-style: italic;
+    text-align: center;
+    margin-bottom: 48px;
+    line-height: 1.5;
+  }
+
+  /* ── BOTTLE TRIO ── */
+  .bottle-trio {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    height: 420px;
+    margin-bottom: 48px;
+  }
+
+  .bottle-slot {
+    position: absolute;
+    bottom: 0;
+    cursor: pointer;
+    transition: transform .35s cubic-bezier(.25,.46,.45,.94), filter .35s ease, z-index 0s;
+    transform-origin: bottom center;
+  }
+
+  .bottle-slot:nth-child(1) { left: 0;   z-index: 2; transform: rotate(-6deg) translateX(30px); }
+  .bottle-slot:nth-child(2) { left: 50%; z-index: 3; transform: translateX(-50%) scale(1.1); }
+  .bottle-slot:nth-child(3) { right: 0;  z-index: 2; transform: rotate(6deg) translateX(-30px); }
+
+  .bottle-slot:hover {
+    filter: brightness(1.12);
+    z-index: 10;
+  }
+
+  .bottle-slot:nth-child(1):hover { transform: rotate(-6deg) translateX(30px) scale(1.04); }
+  .bottle-slot:nth-child(2):hover { transform: translateX(-50%) scale(1.15); }
+  .bottle-slot:nth-child(3):hover { transform: rotate(6deg) translateX(-30px) scale(1.04); }
+
+  .bottle-img {
+    height: 380px;
+    width: auto;
+    display: block;
+    filter: drop-shadow(0 20px 40px rgba(0,0,0,.6));
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* ── TRIO SERIES STRIP ── */
+  .trio-series-strip {
+    display: flex;
+    gap: 2px;
+    justify-content: center;
+    width: 100%;
+    max-width: 560px;
+    margin-bottom: 32px;
+  }
+
+  .series-chip {
+    flex: 1;
+    padding: 10px 8px;
+    background: var(--charcoal2);
+    text-align: center;
+    cursor: pointer;
+    transition: background .15s;
+    border-bottom: 2px solid transparent;
+  }
+
+  .series-chip:hover { background: var(--charcoal3); }
+
+  .series-chip-code {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: .12em;
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .series-chip-name {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--cream3);
+    display: block;
+    white-space: nowrap;
+  }
+
+  .trio-cta-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .cta-btn {
+    font-family: var(--font-display);
+    font-size: 15px;
+    letter-spacing: .12em;
+    padding: 12px 28px;
+    cursor: pointer;
+    border: none;
+    transition: background .15s, color .15s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .cta-btn-primary { background: var(--gold); color: var(--charcoal); }
+  .cta-btn-primary:hover { background: var(--gold-lt); }
+  .cta-btn-ghost { background: transparent; color: var(--cream); border: 1px solid var(--charcoal4); }
+  .cta-btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── DETAIL VIEW ── */
+  #detail-view {
+    width: 100%;
+    padding: 0;
+    display: none;
+    opacity: 0;
+    transition: opacity .4s ease;
+  }
+
+  #detail-view.visible {
+    display: block;
+    opacity: 1;
+  }
+
+  .detail-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    min-height: 520px;
+  }
+
+  /* LEFT — bottle */
+  .detail-bottle-col {
+    background: var(--charcoal2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 48px 32px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .detail-bottle-col::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 200px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(200,149,42,.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .detail-bottle-img {
+    height: 420px;
+    width: auto;
+    filter: drop-shadow(0 24px 48px rgba(0,0,0,.7));
+    position: relative;
+    z-index: 1;
+    animation: floatIn .5s cubic-bezier(.25,.46,.45,.94) both;
+  }
+
+  @keyframes floatIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* RIGHT — info */
+  .detail-info-col {
+    background: var(--charcoal);
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .detail-back-btn {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 32px;
+    transition: color .15s;
+  }
+
+  .detail-back-btn:hover { color: var(--gold-lt); }
+
+  .detail-back-arrow {
+    display: inline-block;
+    width: 20px;
+    height: 1px;
+    background: currentColor;
+    position: relative;
+    vertical-align: middle;
+  }
+
+  .detail-back-arrow::before {
+    content: '';
+    position: absolute;
+    left: 0; top: -3px;
+    width: 7px; height: 7px;
+    border-left: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    transform: rotate(45deg);
+  }
+
+  .detail-series-badge {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  .detail-name {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4vw, 44px);
+    color: var(--cream);
+    letter-spacing: .04em;
+    line-height: 1;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .detail-vintage {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .18em;
+    color: var(--gold);
+    margin-bottom: 24px;
+  }
+
+  .detail-desc {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    color: #C4BAA6;
+    font-style: italic;
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+
+  /* stats grid */
+  .detail-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    margin-bottom: 28px;
+  }
+
+  .stat-cell {
+    background: var(--charcoal2);
+    padding: 14px 12px;
+  }
+
+  .stat-val {
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: var(--cream);
+    letter-spacing: .04em;
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .stat-lbl {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--charcoal4);
+  }
+
+  /* tasting notes */
+  .detail-notes-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: #9A6E18;
+    margin-bottom: 10px;
+  }
+
+  .detail-notes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+
+  .note-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--cream3);
+    background: var(--charcoal2);
+    padding: 5px 10px;
+  }
+
+  .detail-btn-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  /* ── MASH BILL BAR ── */
+  .mash-section {
+    background: var(--charcoal2);
+    padding: 20px 40px;
+    border-top: 1px solid var(--charcoal3);
+  }
+
+  .mash-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: #9A6E18;
+    margin-bottom: 14px;
+  }
+
+  .mash-bar-row {
+    display: flex;
+    gap: 2px;
+    height: 32px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .mash-segment {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    color: var(--charcoal);
+    transition: filter .15s;
+    white-space: nowrap;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .mash-segment:hover { filter: brightness(1.1); }
+  .mash-corn   { background: #C8952A; }
+  .mash-rye    { background: #8B6914; color: var(--cream3); }
+  .mash-wheat  { background: #6B5210; color: var(--cream3); }
+  .mash-malt   { background: #4A3A0E; color: var(--cream3); }
+
+  .mash-key {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+  }
+
+  .mash-key-item {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--cream3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .mash-key-dot {
+    width: 8px; height: 8px;
+    flex-shrink: 0;
+  }
+
+  /* ── SIBLING STRIP ── */
+  .sibling-strip {
+    background: var(--charcoal);
+    padding: 20px 40px;
+    border-top: 1px solid var(--charcoal3);
+    display: flex;
+    gap: 2px;
+  }
+
+  .sibling-btn {
+    flex: 1;
+    background: var(--charcoal2);
+    border: none;
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: background .15s;
+    text-align: left;
+  }
+
+  .sibling-btn:hover { background: var(--charcoal3); }
+  .sibling-btn.active { border-bottom: 2px solid var(--gold); }
+
+  .sibling-img {
+    height: 48px;
+    width: auto;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,.5));
+    flex-shrink: 0;
+  }
+
+  .sibling-info { flex: 1; min-width: 0; }
+
+  .sibling-code {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--gold);
+    letter-spacing: .12em;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .sibling-name {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--cream3);
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ── RESPONSIVE ── */
+  /* ── MOBILE RESPONSIVE ── */
+  @media (max-width: 760px) {
+
+    /* Trio view */
+    #trio-view { padding: 32px 20px 40px; }
+    .trio-headline { font-size: clamp(28px, 8vw, 48px); }
+    .trio-subhead { font-size: 14px; margin-bottom: 28px; }
+
+    /* Bottle trio — smaller, tighter overlap */
+    .bottle-trio { height: 260px; max-width: 320px; margin-bottom: 32px; }
+    .bottle-img { height: 240px; }
+    .bottle-slot:nth-child(1) { transform: rotate(-5deg) translateX(20px); }
+    .bottle-slot:nth-child(3) { transform: rotate(5deg) translateX(-20px); }
+    .bottle-slot:nth-child(1):hover { transform: rotate(-5deg) translateX(20px) scale(1.04); }
+    .bottle-slot:nth-child(3):hover { transform: rotate(5deg) translateX(-20px) scale(1.04); }
+
+    /* Series chips — full width row */
+    .trio-series-strip { gap: 2px; }
+    .series-chip { padding: 8px 4px; }
+    .series-chip-code { font-size: 12px; }
+    .series-chip-name { font-size: 7px; letter-spacing: .1em; }
+
+    /* CTA buttons stack */
+    .trio-cta-row { flex-direction: column; align-items: center; gap: 8px; }
+    .cta-btn { width: 100%; max-width: 280px; text-align: center; }
+
+    /* Detail view — single column, bottle on top */
+    .detail-inner { grid-template-columns: 1fr; }
+    .detail-bottle-col { padding: 32px 20px 0; min-height: 280px; }
+    .detail-bottle-img { height: 260px; }
+    .detail-info-col { padding: 28px 20px; }
+
+    /* Detail info */
+    .detail-name { font-size: clamp(22px, 6vw, 36px); }
+    .detail-desc { font-size: 14px; }
+    .detail-stats { grid-template-columns: repeat(2, 1fr); gap: 2px; }
+    .stat-val { font-size: 18px; }
+
+    /* Tasting notes wrap tighter */
+    .detail-notes { gap: 4px; }
+    .note-tag { font-size: 8px; padding: 4px 8px; }
+
+    /* Detail buttons stack */
+    .detail-btn-row { flex-direction: column; gap: 8px; }
+    .detail-btn-row .cta-btn { width: 100%; text-align: center; }
+
+    /* Mash bill */
+    .mash-section { padding: 16px 20px; }
+    .mash-bar-row { height: 28px; }
+    .mash-key { gap: 10px; flex-wrap: wrap; }
+    .mash-key-item { font-size: 8px; }
+
+    /* Sibling strip — horizontal scroll */
+    .sibling-strip { padding: 12px 16px; gap: 2px; overflow-x: auto; }
+    .sibling-btn { min-width: 140px; flex: 0 0 auto; }
+    .sibling-img { height: 40px; }
+    .sibling-code { font-size: 9px; }
+    .sibling-name { font-size: 7px; }
+
+    /* Modals */
+    #coming-soon-modal > div:last-child { padding: 32px 20px; }
+  }
+
+  @media (max-width: 420px) {
+    .bottle-trio { height: 220px; max-width: 280px; }
+    .bottle-img { height: 200px; }
+    .detail-bottle-img { height: 220px; }
+    .series-chip-name { display: none; }
+    .series-chip-code { font-size: 14px; margin-bottom: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <!-- ── TRIO VIEW ── -->
+  <div id="trio-view">
+    <div class="trio-eyebrow">First Generation &nbsp;·&nbsp; G1 &nbsp;·&nbsp; 2026</div>
+    <h2 class="trio-headline">The Inaugural Release</h2>
+    <p class="trio-subhead">Three expressions. Each hand selected. Each numbered.</p>
+
+    <div class="bottle-trio">
+      <div class="bottle-slot" onclick="openDetail(0)">
+        <img class="bottle-img" src="https://raw.githubusercontent.com/throttledinbond/Bottle_Showcase/main/FS_G1_Render.png" alt="Founders Select" onerror="this.src='https://placehold.co/180x420/242220/C8952A?text=FS'">
+      </div>
+      <div class="bottle-slot" onclick="openDetail(2)">
+        <img class="bottle-img" src="https://raw.githubusercontent.com/throttledinbond/Bottle_Showcase/main/BF_G1_Render.png" alt="Barn Find" onerror="this.src='https://placehold.co/180x420/242220/C8952A?text=BF'">
+      </div>
+      <div class="bottle-slot" onclick="openDetail(1)">
+        <img class="bottle-img" src="https://raw.githubusercontent.com/throttledinbond/Bottle_Showcase/main/CS_G1_Render.png" alt="Collection Series" onerror="this.src='https://placehold.co/180x420/242220/C8952A?text=CS'">
+      </div>
+    </div>
+
+    <div class="trio-series-strip">
+      <div class="series-chip" onclick="openDetail(0)">
+        <span class="series-chip-code">FS</span>
+        <span class="series-chip-name">Founders Select</span>
+      </div>
+      <div class="series-chip" onclick="openDetail(2)">
+        <span class="series-chip-code">BF</span>
+        <span class="series-chip-name">Barn Find</span>
+      </div>
+      <div class="series-chip" onclick="openDetail(1)">
+        <span class="series-chip-code">CS</span>
+        <span class="series-chip-name">Collection Series</span>
+      </div>
+    </div>
+
+    <div class="trio-cta-row">
+      <button class="cta-btn cta-btn-primary" onclick="showModal()">Find a Bottle</button>
+      <a href="/vin-ta-ge" class="cta-btn cta-btn-ghost">Decode VIN-TAGe™</a>
+    </div>
+  </div>
+
+  <!-- ── DETAIL VIEW ── -->
+  <div id="detail-view">
+    <div class="detail-inner">
+      <div class="detail-bottle-col">
+        <img class="detail-bottle-img" id="detail-img" src="" alt="">
+      </div>
+      <div class="detail-info-col">
+        <div>
+          <button class="detail-back-btn" onclick="closeDetail()">
+            <span class="detail-back-arrow"></span>
+            All Releases
+          </button>
+          <div class="detail-series-badge" id="detail-series-badge"></div>
+          <div class="detail-name" id="detail-name"></div>
+          <div class="detail-vintage" id="detail-vintage"></div>
+          <p class="detail-desc" id="detail-desc"></p>
+          <div class="detail-stats" id="detail-stats"></div>
+          <div class="detail-notes-label">Tasting Notes</div>
+          <div class="detail-notes" id="detail-notes"></div>
+        </div>
+        <div class="detail-btn-row">
+          <button class="cta-btn cta-btn-primary" id="detail-buy-btn" onclick="showModal()">Find a Bottle</button>
+          <a href="/vin-ta-ge" class="cta-btn cta-btn-ghost">Decode VIN-TAGe™</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="mash-section">
+      <div class="mash-label">Mash Bill</div>
+      <div class="mash-bar-row" id="mash-bar"></div>
+      <div class="mash-key" id="mash-key"></div>
+    </div>
+
+    <div class="sibling-strip" id="sibling-strip"></div>
+  </div>
+
+</div>
+
+<script>
+const BARRELS = [
+  {
+    id: 0,
+    seriesCode: 'FS',
+    seriesName: 'Founders Select',
+    vintageCode: 'TIB 26 FS G1 00001',
+    name: 'Kentucky Straight Bourbon Whiskey',
+    barrel: '00001',
+    proof: '[Pending]',
+    age: '6 YRS',
+    origin: 'KY',
+    generation: 'G1',
+    img: 'https://raw.githubusercontent.com/throttledinbond/Bottle_Showcase/main/FS_G1_Render.png',
+    placeholder: 'https://placehold.co/200x480/242220/C8952A?text=FS',
+    desc: 'The inaugural expression from THROTTLED IN BOND™. A Kentucky Straight Bourbon selected at barrel strength — powerful, structured, and built for the collector. Every detail is encoded in its VIN-TAGe™.',
+    notes: ['Vanilla', 'Toasted Oak', 'Dark Caramel', 'Dried Cherry', 'Leather', 'Baking Spice'],
+    mashBill: { corn: 74, rye: 18, wheat: 0, malt: 8 },
+    buyLink: '#'
+  },
+  {
+    id: 1,
+    seriesCode: 'CS',
+    seriesName: 'Collection Series',
+    vintageCode: 'TIB 26 CS G1 00002',
+    name: 'High Rye Bourbon — Rum Cask Finish',
+    barrel: '00002',
+    proof: '[Pending]',
+    age: '6 YRS',
+    origin: 'KY',
+    generation: 'G1',
+    img: 'https://raw.githubusercontent.com/throttledinbond/Bottle_Showcase/main/CS_G1_Render.png',
+    placeholder: 'https://placehold.co/200x480/242220/C8952A?text=CS',
+    desc: 'The first Collection Series expression. A high-rye mash bill finished in rum casks — an unexpected crossover that rewards the adventurous collector. Full specs coming at release.',
+    notes: ['Brown Sugar', 'Tropical Fruit', 'White Pepper', 'Molasses', 'Vanilla', 'Clove'],
+    mashBill: { corn: 60, rye: 36, wheat: 0, malt: 4 },
+    buyLink: '#'
+  },
+  {
+    id: 2,
+    seriesCode: 'BF',
+    seriesName: 'Barn Find',
+    vintageCode: 'TIB 26 BF G1 00003',
+    name: 'Vintage Barrel American Whiskey',
+    barrel: '00003',
+    proof: '[PENDING]',
+    age: '11 YRS',
+    origin: 'KY',
+    generation: 'G1',
+    img: 'https://raw.githubusercontent.com/throttledinbond/Bottle_Showcase/main/BF_G1_Render.png',
+    placeholder: 'https://placehold.co/200x480/242220/C8952A?text=BF',
+    desc: 'A true Barn Find — a single barrel discovered after years in the wood. Deep, complex, and impossibly rare. Like the best classic cars, this one was worth the wait. Full specs at release.',
+    notes: ['Dark Chocolate', 'Tobacco', 'Dried Fig', 'Aged Leather', 'Black Pepper', 'Charred Wood'],
+    mashBill: { corn: 70, rye: 21, wheat: 0, malt: 9 },
+    buyLink: '#'
+  }
+];
+
+let activeId = null;
+
+function openDetail(id) {
+  const b = BARRELS[id];
+  activeId = id;
+
+  // Set image
+  const img = document.getElementById('detail-img');
+  img.src = b.img;
+  img.onerror = () => { img.src = b.placeholder; };
+  img.alt = b.seriesName;
+
+  // Set text fields
+  document.getElementById('detail-series-badge').textContent = b.seriesCode + ' · ' + b.seriesName + ' · Barrel ' + b.barrel;
+  document.getElementById('detail-name').textContent = b.name;
+  document.getElementById('detail-vintage').textContent = b.vintageCode;
+  document.getElementById('detail-desc').textContent = b.desc;
+  document.getElementById('detail-buy-btn').href = b.buyLink;
+
+  // Stats
+  const statsEl = document.getElementById('detail-stats');
+  statsEl.innerHTML = [
+    { val: b.proof, lbl: 'Proof' },
+    { val: b.age,   lbl: 'Age' },
+    { val: b.origin, lbl: 'Origin' },
+    { val: b.generation, lbl: 'Generation' }
+  ].map(s => `
+    <div class="stat-cell">
+      <span class="stat-val">${s.val}</span>
+      <span class="stat-lbl">${s.lbl}</span>
+    </div>
+  `).join('');
+
+  // Tasting notes
+  document.getElementById('detail-notes').innerHTML = b.notes
+    .map(n => `<span class="note-tag">${n}</span>`).join('');
+
+  // Mash bill bar
+  const { corn, rye, wheat, malt } = b.mashBill;
+  const total = corn + rye + wheat + malt;
+  const segments = [
+    { pct: corn,  cls: 'mash-corn',  label: `C ${corn}%`,  color: '#C8952A', name: `Corn ${corn}%` },
+    { pct: rye,   cls: 'mash-rye',   label: `R ${rye}%`,   color: '#8B6914', name: `Rye ${rye}%` },
+    { pct: wheat, cls: 'mash-wheat', label: `W ${wheat}%`, color: '#6B5210', name: `Wheat ${wheat}%` },
+    { pct: malt,  cls: 'mash-malt',  label: `MB ${malt}%`, color: '#4A3A0E', name: `Malted Barley ${malt}%` }
+  ].filter(s => s.pct > 0);
+
+  document.getElementById('mash-bar').innerHTML = segments
+    .map(s => `<div class="mash-segment ${s.cls}" style="width:${(s.pct/total*100).toFixed(1)}%">${s.label}</div>`)
+    .join('');
+
+  document.getElementById('mash-key').innerHTML = segments
+    .map(s => `<span class="mash-key-item"><span class="mash-key-dot" style="background:${s.color}"></span>${s.name}</span>`)
+    .join('');
+
+  // Sibling strip
+  document.getElementById('sibling-strip').innerHTML = BARRELS.map(sib => `
+    <button class="sibling-btn${sib.id === id ? ' active' : ''}" onclick="openDetail(${sib.id})">
+      <img class="sibling-img" src="${sib.img}" alt="${sib.seriesName}" onerror="this.src='${sib.placeholder}'">
+      <div class="sibling-info">
+        <span class="sibling-code">${sib.seriesCode} · ${sib.barrel}</span>
+        <span class="sibling-name">${sib.name}</span>
+      </div>
+    </button>
+  `).join('');
+
+  // Switch views
+  const trio = document.getElementById('trio-view');
+  const detail = document.getElementById('detail-view');
+
+  trio.style.opacity = '0';
+  trio.style.transform = 'translateY(-12px)';
+  setBgOpacity('0.08');
+
+  setTimeout(() => {
+    trio.style.display = 'none';
+    detail.style.display = 'block';
+    requestAnimationFrame(() => {
+      detail.classList.add('visible');
+    });
+    notifyHeight();
+  }, 350);
+}
+
+function closeDetail() {
+  const trio = document.getElementById('trio-view');
+  const detail = document.getElementById('detail-view');
+
+  detail.classList.remove('visible');
+
+  setTimeout(() => {
+    detail.style.display = 'none';
+    trio.style.display = 'flex';
+    requestAnimationFrame(() => {
+      trio.style.opacity = '1';
+      trio.style.transform = 'translateY(0)';
+      setBgOpacity('0.18');
+    });
+    notifyHeight();
+  }, 350);
+}
+
+
+// iFrame height reporting
+function notifyHeight() {
+  setTimeout(() => {
+    const h = document.body.scrollHeight;
+    window.parent.postMessage({ type: 'tib-showcase-height', height: h }, '*');
+  }, 100);
+}
+
+// Background — dim more in detail view
+function setBgOpacity(val) {
+  if (val === '0.08') {
+    document.body.classList.add('detail-open');
+  } else {
+    document.body.classList.remove('detail-open');
+  }
+}
+
+// Init
+window.addEventListener('load', notifyHeight);
+window.addEventListener('resize', notifyHeight);
+
+// ── COMING SOON MODAL ──
+function showModal() {
+  const modal = document.getElementById('coming-soon-modal');
+  modal.style.display = 'flex';
+  notifyHeight();
+}
+
+function closeModal() {
+  const modal = document.getElementById('coming-soon-modal');
+  modal.style.display = 'none';
+  notifyHeight();
+}
+
+</script>
+
+<!-- ── COMING SOON MODAL ── -->
+<div id="coming-soon-modal" style="display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;">
+  <div id="modal-overlay" onclick="closeModal()" style="position:absolute;inset:0;background:rgba(26,25,23,.85);"></div>
+  <div style="position:relative;background:#242220;max-width:480px;width:90%;padding:48px 40px;z-index:1001;border-top:2px solid #C8952A;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.28em;text-transform:uppercase;color:#C8952A;margin-bottom:16px;">Release Announcement</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#F2EDE3;letter-spacing:.04em;line-height:1;margin-bottom:16px;">Release Coming Soon</div>
+    <p style="font-family:'Cormorant Garamond',serif;font-size:16px;color:#C4BAA6;font-style:italic;line-height:1.7;margin-bottom:28px;">Join The Barrel Inventory for alerts on this and all future releases. Be first in line when bottles drop.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="https://david29326.wixsite.com/tib-test" target="_parent" style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.12em;padding:12px 28px;background:#C8952A;color:#1A1917;text-decoration:none;display:inline-block;">Join The Barrel Inventory</a>
+      <button onclick="closeModal()" style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.12em;padding:12px 24px;background:transparent;color:#F2EDE3;border:1px solid #3E3B35;cursor:pointer;">Close</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
